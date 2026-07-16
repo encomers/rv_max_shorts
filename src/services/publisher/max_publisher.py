@@ -39,53 +39,6 @@ class MaxPublisher(IMessageSender):
             event.enclosure = None
             await self.publish(event)
 
-        # async def _get_upload_server(self) -> HttpUrl | None:
-        #     request_url = self._base_url + "/uploads?type=image"
-        #     headers = {"Authorization": f"{self._token}"}
-        #     try:
-        #         async with httpx.AsyncClient(timeout=20) as client:
-        #             response = await client.post(request_url, headers=headers)
-        #             response.raise_for_status()
-        #             data = UploadServerResponse.model_validate(response.json())
-        #             return data.url
-        #     except Exception as e:
-        #         logger.error(f"Failed to get upload server: {e}")
-        #         return None
-
-        # async def _upload_image_to_server(
-        #     self, url: HttpUrl, image_data: str
-        # ) -> str | None:
-        #     headers = {
-        #         "Authorization": f"{self._token}",
-        #     }
-
-        #     if "," in image_data:
-        #         image_data = image_data.split(",", 1)[1]
-        #     binary_data = base64.b64decode(image_data)
-
-        #     files = {"data": ("image.jpg", binary_data, "image/jpeg")}
-        #     try:
-        #         async with httpx.AsyncClient(timeout=20) as client:
-        #             response = await client.post(str(url), headers=headers, files=files)
-        #             response.raise_for_status()
-        #             data = response.json()
-        #             return data
-        #     except Exception as e:
-        #         logger.error(f"Failed to upload image to server: {e}")
-        #         return None
-
-        # async def _upload_image(self, image_url: HttpUrl) -> str | None:
-        # try:
-        #     base64_image = await to_base64_image(str(image_url))
-        #     upload_url = await self._get_upload_server()
-        #     if upload_url is None:
-        #         return None
-        #     token = await self._upload_image_to_server(upload_url, base64_image)
-        #     return token
-        # except Exception as e:
-        #     logger.error(f"Failed to upload image: {e}")
-        #     return None
-
     async def publish(
         self,
         text: ReadyText,
@@ -111,7 +64,7 @@ class MaxPublisher(IMessageSender):
             attachments=[attachment] if attachment is not None else None,
         )
         url = self._base_url + f"/messages?chat_id={self._chat_id}"
-        async with httpx.AsyncClient(timeout=20) as client:
+        async with httpx.AsyncClient(timeout=20, verify=False) as client:
             try:
                 response = await client.post(
                     url,
